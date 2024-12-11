@@ -2,6 +2,7 @@
 
 public class Console : IDisposable
 {
+    private bool _isDisposed;
     public TextWriter COUT { get; }
     public TextWriter CER { get; }
     public TextReader CIN { get; }
@@ -11,12 +12,16 @@ public class Console : IDisposable
         COUT = cout;
         CER = cer;
         CIN = cin;
+        _isDisposed = false;
     }
 
     public void Dispose()
     {
+        if (_isDisposed)
+            return;
         COUT.Dispose();
         CER.Dispose();
         CIN.Dispose();
+        _isDisposed = true;
     }
 }
