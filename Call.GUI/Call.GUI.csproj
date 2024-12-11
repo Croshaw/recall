@@ -9,7 +9,29 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Call.Core\Call.Core.csproj" />
+        <ProjectReference Include="..\Call.Core\Call.Core.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Icons\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Icons\TerminalDark.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Icons\TableDark.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Icons\TreeDark.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Icons\TokenDark.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Icons\RunDark.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>
