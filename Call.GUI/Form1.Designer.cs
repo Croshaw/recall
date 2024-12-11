@@ -1,4 +1,6 @@
-﻿namespace Call.GUI;
+﻿using Call.GUI.Controls;
+
+namespace Call.GUI;
 
 partial class Form1
 {
@@ -29,186 +31,223 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-        ReservedTable = new System.Windows.Forms.DataGridView();
-        SepTable = new System.Windows.Forms.DataGridView();
-        NumberTable = new System.Windows.Forms.DataGridView();
-        IdTable = new System.Windows.Forms.DataGridView();
-        tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-        CodeRTB = new System.Windows.Forms.RichTextBox();
-        tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-        TokensRTB = new System.Windows.Forms.RichTextBox();
-        TokensTable = new System.Windows.Forms.DataGridView();
-        richTextBox1 = new System.Windows.Forms.RichTextBox();
-        menuStrip1 = new System.Windows.Forms.MenuStrip();
-        ((System.ComponentModel.ISupportInitialize)ReservedTable).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)SepTable).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)NumberTable).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)IdTable).BeginInit();
-        tableLayoutPanel1.SuspendLayout();
-        tableLayoutPanel2.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)TokensTable).BeginInit();
+        MainPanel = new System.Windows.Forms.Panel();
+        BottomPanel = new System.Windows.Forms.Panel();
+        BottomPanelSeparator = new System.Windows.Forms.Panel();
+        
+        RightPanelSeparator = new System.Windows.Forms.Panel();
+        RightPanel = new System.Windows.Forms.Panel();
+        RightBarSeparator = new System.Windows.Forms.Panel();
+        RightBar = new System.Windows.Forms.Panel();
+
+        LeftPanelSeparator = new System.Windows.Forms.Panel();
+        LeftPanel = new System.Windows.Forms.Panel();
+        LeftBarSeparator = new System.Windows.Forms.Panel();
+        LeftBar = new System.Windows.Forms.Panel();
+        
+        StatusBar = new System.Windows.Forms.Panel();
+        StatusBarSeparator = new System.Windows.Forms.Panel();
+        
+        Menu = new System.Windows.Forms.MenuStrip();
+        
+        MainPanel.SuspendLayout();
         SuspendLayout();
         // 
-        // ReservedTable
+        // Menu
         // 
-        ReservedTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        ReservedTable.Dock = System.Windows.Forms.DockStyle.Fill;
-        ReservedTable.Location = new System.Drawing.Point(3, 3);
-        ReservedTable.Name = "ReservedTable";
-        ReservedTable.Size = new System.Drawing.Size(125, 223);
-        ReservedTable.TabIndex = 0;
-        ReservedTable.Text = "dataGridView1";
+        Menu.Location = new System.Drawing.Point(0, 0);
+        Menu.Name = "Menu";
+        Menu.Size = new System.Drawing.Size(878, 24);
+        Menu.TabIndex = 4;
+        Menu.Text = "menuStrip1";
         // 
-        // SepTable
+        // StatusBar
         // 
-        SepTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        SepTable.Dock = System.Windows.Forms.DockStyle.Fill;
-        SepTable.Location = new System.Drawing.Point(134, 3);
-        SepTable.Name = "SepTable";
-        SepTable.Size = new System.Drawing.Size(126, 223);
-        SepTable.TabIndex = 1;
-        SepTable.Text = "dataGridView2";
+        StatusBar.BackColor = System.Drawing.SystemColors.ButtonShadow;
+        StatusBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+        StatusBar.Location = new System.Drawing.Point(0, 494);
+        StatusBar.MaximumSize = new System.Drawing.Size(0, 18);
+        StatusBar.MinimumSize = new System.Drawing.Size(0, 18);
+        StatusBar.Name = "StatusBar";
+        StatusBar.Size = new System.Drawing.Size(878, 18);
+        StatusBar.TabIndex = 5;
         // 
-        // NumberTable
+        // LeftBar
         // 
-        NumberTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        NumberTable.Dock = System.Windows.Forms.DockStyle.Fill;
-        NumberTable.Location = new System.Drawing.Point(3, 232);
-        NumberTable.Name = "NumberTable";
-        NumberTable.Size = new System.Drawing.Size(125, 223);
-        NumberTable.TabIndex = 2;
-        NumberTable.Text = "dataGridView3";
+        LeftBar.BackColor = System.Drawing.SystemColors.ButtonShadow;
+        LeftBar.Dock = System.Windows.Forms.DockStyle.Left;
+        LeftBar.Location = new System.Drawing.Point(0, 24);
+        LeftBar.MaximumSize = new System.Drawing.Size(28, 0);
+        LeftBar.MinimumSize = new System.Drawing.Size(28, 0);
+        LeftBar.Name = "LeftBar";
+        LeftBar.Size = new System.Drawing.Size(28, 469);
+        LeftBar.TabIndex = 6;
         // 
-        // IdTable
+        // RightBar
         // 
-        IdTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        IdTable.Dock = System.Windows.Forms.DockStyle.Fill;
-        IdTable.Location = new System.Drawing.Point(134, 232);
-        IdTable.Name = "IdTable";
-        IdTable.Size = new System.Drawing.Size(126, 223);
-        IdTable.TabIndex = 3;
-        IdTable.Text = "dataGridView4";
+        RightBar.BackColor = System.Drawing.SystemColors.ButtonShadow;
+        RightBar.Dock = System.Windows.Forms.DockStyle.Right;
+        RightBar.Location = new System.Drawing.Point(854, 24);
+        RightBar.MaximumSize = new System.Drawing.Size(28, 0);
+        RightBar.MinimumSize = new System.Drawing.Size(28, 0);
+        RightBar.Name = "RightBar";
+        RightBar.Size = new System.Drawing.Size(28, 469);
+        RightBar.TabIndex = 7;
         // 
-        // tableLayoutPanel1
+        // LeftBarSeparator
         // 
-        tableLayoutPanel1.ColumnCount = 2;
-        tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        tableLayoutPanel1.Controls.Add(IdTable, 1, 1);
-        tableLayoutPanel1.Controls.Add(NumberTable, 0, 1);
-        tableLayoutPanel1.Controls.Add(SepTable, 1, 0);
-        tableLayoutPanel1.Controls.Add(ReservedTable, 0, 0);
-        tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Left;
-        tableLayoutPanel1.Location = new System.Drawing.Point(0, 24);
-        tableLayoutPanel1.Name = "tableLayoutPanel1";
-        tableLayoutPanel1.RowCount = 2;
-        tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        tableLayoutPanel1.Size = new System.Drawing.Size(263, 458);
-        tableLayoutPanel1.TabIndex = 1;
+        LeftBarSeparator.BackColor = System.Drawing.Color.Black;
+        LeftBarSeparator.Dock = System.Windows.Forms.DockStyle.Left;
+        LeftBarSeparator.Location = new System.Drawing.Point(24, 24);
+        LeftBarSeparator.MaximumSize = new System.Drawing.Size(1, 0);
+        LeftBarSeparator.MinimumSize = new System.Drawing.Size(1, 0);
+        LeftBarSeparator.Name = "LeftBarSeparator";
+        LeftBarSeparator.Size = new System.Drawing.Size(1, 469);
+        LeftBarSeparator.TabIndex = 8;
         // 
-        // CodeRTB
+        // StatusBarSeparator
         // 
-        CodeRTB.Dock = System.Windows.Forms.DockStyle.Fill;
-        CodeRTB.Location = new System.Drawing.Point(263, 24);
-        CodeRTB.Name = "CodeRTB";
-        CodeRTB.Size = new System.Drawing.Size(430, 316);
-        CodeRTB.TabIndex = 0;
-        CodeRTB.Text = "";
+        StatusBarSeparator.BackColor = System.Drawing.SystemColors.Desktop;
+        StatusBarSeparator.Dock = System.Windows.Forms.DockStyle.Bottom;
+        StatusBarSeparator.Location = new System.Drawing.Point(0, 493);
+        StatusBarSeparator.MaximumSize = new System.Drawing.Size(0, 1);
+        StatusBarSeparator.MinimumSize = new System.Drawing.Size(0, 1);
+        StatusBarSeparator.Name = "StatusBarSeparator";
+        StatusBarSeparator.Size = new System.Drawing.Size(878, 1);
+        StatusBarSeparator.TabIndex = 9;
         // 
-        // tableLayoutPanel2
+        // RightMenuSeparator
         // 
-        tableLayoutPanel2.ColumnCount = 1;
-        tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-        tableLayoutPanel2.Controls.Add(TokensRTB, 0, 1);
-        tableLayoutPanel2.Controls.Add(TokensTable, 0, 0);
-        tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Right;
-        tableLayoutPanel2.Location = new System.Drawing.Point(693, 24);
-        tableLayoutPanel2.Name = "tableLayoutPanel2";
-        tableLayoutPanel2.RowCount = 2;
-        tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        tableLayoutPanel2.Size = new System.Drawing.Size(185, 458);
-        tableLayoutPanel2.TabIndex = 2;
+        RightBarSeparator.BackColor = System.Drawing.Color.Black;
+        RightBarSeparator.Dock = System.Windows.Forms.DockStyle.Right;
+        RightBarSeparator.Location = new System.Drawing.Point(853, 24);
+        RightBarSeparator.MaximumSize = new System.Drawing.Size(1, 0);
+        RightBarSeparator.MinimumSize = new System.Drawing.Size(1, 0);
+        RightBarSeparator.Name = "RightBarSeparator";
+        RightBarSeparator.Size = new System.Drawing.Size(1, 469);
+        RightBarSeparator.TabIndex = 10;
         // 
-        // TokensRTB
+        // MainPanel
         // 
-        TokensRTB.Dock = System.Windows.Forms.DockStyle.Fill;
-        TokensRTB.Location = new System.Drawing.Point(3, 232);
-        TokensRTB.Name = "TokensRTB";
-        TokensRTB.Size = new System.Drawing.Size(179, 223);
-        TokensRTB.TabIndex = 3;
-        TokensRTB.Text = "";
+        MainPanel.Controls.Add(BottomPanel);
+        MainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+        MainPanel.Location = new System.Drawing.Point(25, 24);
+        MainPanel.Name = "MainPanel";
+        MainPanel.Size = new System.Drawing.Size(828, 469);
+        MainPanel.MinimumSize = new System.Drawing.Size(50, 50);
+        MainPanel.TabIndex = 11;
         // 
-        // TokensTable
+        // panel1
         // 
-        TokensTable.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        TokensTable.Dock = System.Windows.Forms.DockStyle.Fill;
-        TokensTable.Location = new System.Drawing.Point(3, 3);
-        TokensTable.Name = "TokensTable";
-        TokensTable.Size = new System.Drawing.Size(179, 223);
-        TokensTable.TabIndex = 2;
-        TokensTable.Text = "dataGridView5";
+        BottomPanel.BackColor = System.Drawing.SystemColors.ButtonShadow;
+        BottomPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+        BottomPanel.Location = new System.Drawing.Point(0, 400);
+        BottomPanel.Name = "BottomPanel";
+        BottomPanel.Size = new System.Drawing.Size(828, 69);
+        BottomPanel.TabIndex = 6;
         // 
-        // richTextBox1
+        // BottomPanelSeparator
         // 
-        richTextBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-        richTextBox1.Location = new System.Drawing.Point(263, 340);
-        richTextBox1.Name = "richTextBox1";
-        richTextBox1.Size = new System.Drawing.Size(430, 142);
-        richTextBox1.TabIndex = 3;
-        richTextBox1.Text = "";
+        BottomPanelSeparator.BackColor = System.Drawing.SystemColors.Desktop;
+        BottomPanelSeparator.Dock = System.Windows.Forms.DockStyle.Bottom;
+        BottomPanelSeparator.Location = new System.Drawing.Point(0, 493);
+        BottomPanelSeparator.MaximumSize = new System.Drawing.Size(0, 1);
+        BottomPanelSeparator.MinimumSize = new System.Drawing.Size(0, 1);
+        BottomPanelSeparator.Name = "StatusBarSeparator";
+        BottomPanelSeparator.Size = new System.Drawing.Size(878, 1);
+        BottomPanelSeparator.TabIndex = 9;
         // 
-        // menuStrip1
+        // LeftPanelSeparator
         // 
-        menuStrip1.Location = new System.Drawing.Point(0, 0);
-        menuStrip1.Name = "menuStrip1";
-        menuStrip1.Size = new System.Drawing.Size(878, 24);
-        menuStrip1.TabIndex = 4;
-        menuStrip1.Text = "menuStrip1";
+        LeftPanelSeparator.BackColor = System.Drawing.Color.Black;
+        LeftPanelSeparator.Dock = System.Windows.Forms.DockStyle.Left;
+        LeftPanelSeparator.Location = new System.Drawing.Point(24, 24);
+        LeftPanelSeparator.MaximumSize = new System.Drawing.Size(1, 0);
+        LeftPanelSeparator.MinimumSize = new System.Drawing.Size(1, 0);
+        LeftPanelSeparator.Name = "LeftPanelSeparator";
+        LeftPanelSeparator.Size = new System.Drawing.Size(1, 469);
+        LeftPanelSeparator.TabIndex = 8;
+        // 
+        // RightPanelSeparator
+        // 
+        RightPanelSeparator.BackColor = System.Drawing.Color.Black;
+        RightPanelSeparator.Dock = System.Windows.Forms.DockStyle.Right;
+        RightPanelSeparator.Location = new System.Drawing.Point(24, 24);
+        RightPanelSeparator.MaximumSize = new System.Drawing.Size(1, 0);
+        RightPanelSeparator.MinimumSize = new System.Drawing.Size(1, 0);
+        RightPanelSeparator.Name = "RightPanelSeparator";
+        RightPanelSeparator.Size = new System.Drawing.Size(1, 469);
+        RightPanelSeparator.TabIndex = 8;
+        // 
+        // RightPanel
+        // 
+        RightPanel.BackColor = System.Drawing.SystemColors.ButtonShadow;
+        RightPanel.Dock = System.Windows.Forms.DockStyle.Right;
+        RightPanel.Location = new System.Drawing.Point(854, 24);
+        RightPanel.Name = "RightPanel";
+        RightPanel.Size = new System.Drawing.Size(50, 469);
+        RightPanel.TabIndex = 7;
+        // 
+        // LeftPanel
+        // 
+        LeftPanel.BackColor = System.Drawing.SystemColors.ButtonShadow;
+        LeftPanel.Dock = System.Windows.Forms.DockStyle.Left;
+        LeftPanel.Location = new System.Drawing.Point(854, 24);
+        LeftPanel.Name = "LeftPanel";
+        LeftPanel.Size = new System.Drawing.Size(50, 469);
+        LeftPanel.TabIndex = 7;
         // 
         // Form1
         // 
         AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        ClientSize = new System.Drawing.Size(878, 482);
-        Controls.Add(CodeRTB);
-        Controls.Add(richTextBox1);
-        Controls.Add(tableLayoutPanel2);
-        Controls.Add(tableLayoutPanel1);
-        Controls.Add(menuStrip1);
-        MainMenuStrip = menuStrip1;
+        ClientSize = new System.Drawing.Size(878, 512);
+        Controls.Add(MainPanel);
+        
+        
+        Controls.Add(RightPanelSeparator);
+        Controls.Add(LeftPanelSeparator);
+        
+        Controls.Add(RightPanel);
+        Controls.Add(LeftPanel);
+        
+        Controls.Add(BottomPanelSeparator);
+        Controls.Add(BottomPanel);
+        
+        Controls.Add(RightBarSeparator);
+        Controls.Add(LeftBarSeparator);
+        
+        Controls.Add(RightBar);
+        Controls.Add(LeftBar);
+        Controls.Add(Menu);
+        Controls.Add(StatusBarSeparator);
+        Controls.Add(StatusBar);
+        MainMenuStrip = Menu;
         Text = "Form1";
-        ((System.ComponentModel.ISupportInitialize)ReservedTable).EndInit();
-        ((System.ComponentModel.ISupportInitialize)SepTable).EndInit();
-        ((System.ComponentModel.ISupportInitialize)NumberTable).EndInit();
-        ((System.ComponentModel.ISupportInitialize)IdTable).EndInit();
-        tableLayoutPanel1.ResumeLayout(false);
-        tableLayoutPanel2.ResumeLayout(false);
-        ((System.ComponentModel.ISupportInitialize)TokensTable).EndInit();
+        MainPanel.ResumeLayout(false);
         ResumeLayout(false);
         PerformLayout();
     }
-
-    private System.Windows.Forms.MenuStrip menuStrip1;
-
-    private System.Windows.Forms.RichTextBox richTextBox1;
-
-    private System.Windows.Forms.RichTextBox TokensRTB;
-
-    private System.Windows.Forms.DataGridView dataGridView6;
-
-    private System.Windows.Forms.DataGridView TokensTable;
-
-    private System.Windows.Forms.DataGridView SepTable;
-    private System.Windows.Forms.DataGridView NumberTable;
-    private System.Windows.Forms.DataGridView IdTable;
-    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-
-    private System.Windows.Forms.DataGridView ReservedTable;
-
-    private System.Windows.Forms.RichTextBox CodeRTB;
-    private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+    private System.Windows.Forms.Panel MainPanel;
+    
+    private System.Windows.Forms.Panel BottomPanelSeparator;
+    private System.Windows.Forms.Panel BottomPanel;
+    
+    
+    private System.Windows.Forms.Panel RightPanelSeparator;
+    private System.Windows.Forms.Panel RightPanel;
+    private System.Windows.Forms.Panel RightBarSeparator;
+    private System.Windows.Forms.Panel RightBar;
+    
+    private System.Windows.Forms.Panel LeftPanelSeparator;
+    private System.Windows.Forms.Panel LeftPanel;
+    private System.Windows.Forms.Panel LeftBarSeparator;
+    private System.Windows.Forms.Panel LeftBar;
+    
+    private System.Windows.Forms.Panel StatusBarSeparator;
+    private System.Windows.Forms.Panel StatusBar;
+    
+    private System.Windows.Forms.MenuStrip Menu;
 
     #endregion
 }
