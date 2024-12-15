@@ -78,10 +78,17 @@ public class Syntaxer
 
     private void ReadNextIfEqualElseThrow(string value)
     {
-        if (Equal(value))
-            ReadNext();
-        else
-            PrintError(ErrorType.Expected, value);
+        try
+        {
+            if (Equal(value))
+                ReadNext();
+            else
+                PrintError(ErrorType.Expected, value);
+        }
+        catch (EndOfStreamException e)
+        {
+            // PrintError(ErrorType.Expected, value);
+        }
     }
 
     private bool Value()
