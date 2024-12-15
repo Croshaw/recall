@@ -5,6 +5,15 @@ namespace Call.GUI;
 
 public class CodeTextBox : UserControl
 {
+    private static readonly Dictionary<char, char> Pairs = new()
+    {
+        { '[', ']' },
+        { '{', '}' },
+        { '(', ')' },
+        { '"', '"' },
+        { '\'', '\'' }
+    };
+
     private readonly RichTextBox _richTextBox;
     private readonly LineNumbersForRTB _lineNumbersForRtb;
 
@@ -75,6 +84,13 @@ public class CodeTextBox : UserControl
         set => _richTextBox.ScrollBars = value;
     }
 
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    public override string Text
+    {
+        get => _richTextBox.Text;
+        set => _richTextBox.Text = value;
+    }
+
     public RichTextBox RichTextBox => _richTextBox;
 
     public CodeTextBox()
@@ -85,6 +101,43 @@ public class CodeTextBox : UserControl
             Dock = DockStyle.Fill,
             Multiline = true,
             BorderStyle = BorderStyle.None
+        };
+        _richTextBox.KeyDown += (s, e) =>
+        {
+            if (e.KeyCode == Keys.Back)
+            {
+                var selectionStart = _richTextBox.SelectionStart;
+                if (selectionStart > 0)
+                {
+                    var remove = _richTextBox.Text[_richTextBox.SelectionStart - 1];
+                    if (!Pairs.TryGetValue(remove, out var close) || selectionStart >= _richTextBox.Text.Length ||
+                        _richTextBox.Text[selectionStart] != close) return;
+                    _richTextBox.Text = _richTextBox.Text.Remove(selectionStart - 1, 2);
+                    _richTextBox.SelectionStart = selectionStart - 1;
+                    e.Handled = true;
+                }
+            }
+        };
+        _richTextBox.KeyPress += (s, e) =>
+        {
+            var selectionStart = _richTextBox.SelectionStart;
+            var selectionLength = _richTextBox.SelectionLength;
+            if (Pairs.ContainsValue(e.KeyChar) && selectionLength == 0 && _richTextBox.Text.Length > selectionStart &&
+                _richTextBox.Text[selectionStart] == e.KeyChar)
+            {
+                _richTextBox.SelectionStart++;
+                e.Handled = true;
+            }
+            else if (Pairs.TryGetValue(e.KeyChar, out var close))
+            {
+                if (selectionLength > 0)
+                    _richTextBox.Text = _richTextBox.Text.Insert(selectionStart, e.KeyChar.ToString())
+                        .Insert(selectionStart + selectionLength + 1, close.ToString());
+                else
+                    _richTextBox.Text = _richTextBox.Text.Insert(selectionStart, e.KeyChar + "" + close);
+                _richTextBox.SelectionStart = selectionStart + 1;
+                e.Handled = true;
+            }
         };
         _lineNumbersForRtb = new LineNumbersForRTB()
         {

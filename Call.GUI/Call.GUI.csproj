@@ -32,6 +32,24 @@
         <None Update="Icons\RunDark.png">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Icons\RunGreen.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Icons\StopDark.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="Icons\StopRed.png">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="MainForm.cs">
+            <SubType>Form</SubType>
+        </Compile>
+        <Compile Update="TestForm.cs">
+            <SubType>Form</SubType>
+        </Compile>
     </ItemGroup>
 
 </Project>

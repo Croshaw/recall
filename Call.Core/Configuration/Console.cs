@@ -15,6 +15,11 @@ public class Console : IDisposable
         _isDisposed = false;
     }
 
+    public void Clear()
+    {
+        COUT.WriteLine("clear");
+    }
+
     public void Dispose()
     {
         if (_isDisposed)

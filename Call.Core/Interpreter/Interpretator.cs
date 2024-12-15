@@ -84,7 +84,7 @@ public class Interpretator
                                     _console.COUT.Write(" ");
                             }
 
-                            _console.COUT.Write('\n');
+                            _console.COUT.WriteLine();
 
                             _stack.Clear();
                             break;
@@ -92,7 +92,9 @@ public class Interpretator
                             while (_stack.Count > 0)
                             {
                                 var address = _stack.Pop();
-                                _values[address.Address] = UniValue.Parse(_console.CIN.ReadLine());
+                                var line = _console.CIN.ReadLine();
+                                var temp1 = UniValue.Parse(line);
+                                _values[address.Address] = temp1;
                             }
 
                             break;

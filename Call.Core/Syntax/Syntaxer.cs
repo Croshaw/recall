@@ -71,7 +71,17 @@ public class Syntaxer
     {
         if (_index + 1 < _tokens.Count)
             _index++;
+        else
+            throw new EndOfStreamException();
         Read();
+    }
+
+    private void ReadNextIfEqualElseThrow(string value)
+    {
+        if (Equal(value))
+            ReadNext();
+        else
+            PrintError(ErrorType.Expected, value);
     }
 
     private bool Value()
@@ -148,7 +158,8 @@ public class Syntaxer
             PrintError(ErrorType.Expected, "identifier");
             return;
         }
-        else if (!_variables.ContainsKey(_tokenValue))
+
+        if (!_variables.ContainsKey(_tokenValue))
         {
             PrintError(ErrorType.Undeclared, _tokenValue);
             return;
@@ -156,10 +167,7 @@ public class Syntaxer
 
         _actions.Add(new AddressAction(AddressAction.AddressType.Value, _variables[_tokenValue]));
         ReadNext();
-        if (!Equal("as"))
-            PrintError(ErrorType.Expected, "as");
-        else
-            ReadNext();
+        ReadNextIfEqualElseThrow("as");
         Compare();
         _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Assign));
     }
@@ -202,11 +210,16 @@ public class Syntaxer
 
     private void Start()
     {
-        if (!Equal("program"))
-            PrintError(ErrorType.Expected, "program");
-        ReadNext();
-        Vars();
-        Body();
+        try
+        {
+            ReadNextIfEqualElseThrow("program");
+            Vars();
+            Body();
+        }
+        catch (Exception ex)
+        {
+            _console.CER.WriteLine(ex.Message);
+        }
     }
 
     private void Expression()
@@ -238,10 +251,7 @@ public class Syntaxer
             Compare();
             var jif_id = _actions.Count;
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.JumpIfFalse));
-            if (!Equal("then"))
-                PrintError(ErrorType.Expected, "then");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow("then");
             Oper();
             if (Equal("else"))
             {
@@ -267,10 +277,7 @@ public class Syntaxer
             Compare();
             var jifId = _actions.Count;
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.JumpIfFalse));
-            if (!Equal("do"))
-                PrintError(ErrorType.Expected, "do");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow("do");
             Oper();
             _actions.Add(new AddressAction(AddressAction.AddressType.Instruction, jId));
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Jump));
@@ -283,17 +290,12 @@ public class Syntaxer
             ReadNext();
             var jTo = _actions.Count;
             Assign();
-            if (!Equal("to"))
-                PrintError(ErrorType.Expected, "to");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow("to");
             Compare();
             var jifFrom = _actions.Count;
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.JumpIfFalse));
-            if (!Equal("do"))
-                PrintError(ErrorType.Expected, "do");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow("do");
+
             Oper();
             _actions.Add(new AddressAction(AddressAction.AddressType.Instruction, jTo));
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Jump));
@@ -304,15 +306,10 @@ public class Syntaxer
         if (Equal("read"))
         {
             ReadNext();
-            if (!Equal("("))
-                PrintError(ErrorType.Expected, "(");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow("(");
             Identifiers();
-            if (!Equal(")"))
-                PrintError(ErrorType.Expected, ")");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow(")");
+
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Read));
             return;
         }
@@ -320,15 +317,10 @@ public class Syntaxer
         if (Equal("write"))
         {
             ReadNext();
-            if (!Equal("("))
-                PrintError(ErrorType.Expected, "(");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow("(");
             Expression();
-            if (!Equal(")"))
-                PrintError(ErrorType.Expected, ")");
-            else
-                ReadNext();
+            ReadNextIfEqualElseThrow(")");
+
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Print));
             return;
         }
@@ -348,15 +340,15 @@ public class Syntaxer
 
     private void Vars()
     {
-        if (!Equal("var"))
-            PrintError(ErrorType.Expected, "var");
+        ReadNextIfEqualElseThrow("var");
+
         do
         {
-            ReadNext();
             if (Equal("begin"))
                 return;
             if (!Description())
                 break;
+            ReadNext();
         } while (Equal(";"));
     }
 
@@ -379,6 +371,7 @@ public class Syntaxer
                 if (!Equal(TableType.Identifiers))
                 {
                     PrintError(ErrorType.Expected, "identifier");
+                    return false;
                 }
                 else
                 {
@@ -404,14 +397,9 @@ public class Syntaxer
 
     private void Body()
     {
-        if (!Equal("begin"))
-            PrintError(ErrorType.Expected, "begin");
-        ReadNext();
+        ReadNextIfEqualElseThrow("begin");
         OperatorCycle([";"]);
-        if (!Equal("end"))
-            PrintError(ErrorType.Expected, "end");
-        ReadNext();
-        if (!Equal("."))
-            PrintError(ErrorType.Expected, ".");
+        ReadNextIfEqualElseThrow("end");
+        ReadNextIfEqualElseThrow(".");
     }
 }

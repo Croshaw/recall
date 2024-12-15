@@ -52,9 +52,12 @@ public class Lexer
 
     private void Reset()
     {
+        if (_lexem == "\n")
+            _position = new Position(_position.Row + 1, 2, 0, _index);
+        _start = _index - 1;
+
         _lexem = string.Empty;
         _state = State.Begin;
-        _start = _index - 1;
     }
 
     private void Read()
@@ -305,8 +308,8 @@ public class Lexer
                     if (!_state.HasFlag(State.Error))
                         _state = GetState();
                     _lexem += _cur;
-                    if (_cur == '\n')
-                        _position = new Position(_position.Row + 1, 1, 0, _index + 1);
+                    // if (_cur == '\n')
+                    //     _position = new Position(_position.Row + 1, 1, 0, _index + 1);
                     break;
             }
         }

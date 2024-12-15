@@ -84,10 +84,10 @@ public readonly struct UniValue
     public static UniValue operator +(UniValue left, UniValue right)
     {
         var kind = (ValueKind)Math.Min((short)left.Kind, (short)right.Kind);
+
         return new UniValue(
-            left.Kind == ValueKind.Double
-                ? left.GetDoubleValue()
-                : left.GetIntValue() + (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
+            (left.Kind == ValueKind.Double ? left.GetDoubleValue() : left.GetIntValue())
+            + (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
             kind);
     }
 
@@ -95,9 +95,8 @@ public readonly struct UniValue
     {
         var kind = (ValueKind)Math.Min((short)left.Kind, (short)right.Kind);
         return new UniValue(
-            left.Kind == ValueKind.Double
-                ? left.GetDoubleValue()
-                : left.GetIntValue() - (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
+            (left.Kind == ValueKind.Double ? left.GetDoubleValue() : left.GetIntValue())
+            - (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
             kind);
     }
 
@@ -105,9 +104,9 @@ public readonly struct UniValue
     {
         var kind = (ValueKind)Math.Min((short)left.Kind, (short)right.Kind);
         return new UniValue(
-            left.Kind == ValueKind.Double
+            (left.Kind == ValueKind.Double
                 ? left.GetDoubleValue()
-                : left.GetIntValue() * (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
+                : left.GetIntValue()) * (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
             kind);
     }
 
@@ -117,9 +116,9 @@ public readonly struct UniValue
             throw new DivideByZeroException();
         var kind = (ValueKind)Math.Min((short)left.Kind, (short)right.Kind);
         return new UniValue(
-            left.Kind == ValueKind.Double
+            (left.Kind == ValueKind.Double
                 ? left.GetDoubleValue()
-                : left.GetIntValue() / (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
+                : left.GetIntValue()) / (right.Kind == ValueKind.Double ? right.GetDoubleValue() : right.GetIntValue()),
             kind);
     }
 
