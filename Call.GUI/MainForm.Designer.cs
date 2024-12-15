@@ -57,8 +57,9 @@ partial class MainForm
         var maximizeButton = CreateUtils.CreateButton("□");
         var minimizeButton = CreateUtils.CreateButton("─");
         closeButton.Dock = maximizeButton.Dock = minimizeButton.Dock = DockStyle.Right;
-        closeButton.Width = minimizeButton.Width = maximizeButton.Width = 32;
-        
+        closeButton.Width = minimizeButton.Width = maximizeButton.Width = 48;
+        closeButton.FlatAppearance.MouseOverBackColor = Color.Red;
+        closeButton.FlatAppearance.MouseDownBackColor = Color.DarkRed;
         closeButton.Click += (_, _) => { this.Close(); };
         minimizeButton.Click += (_, _) => { this.WindowState = FormWindowState.Minimized; };
         maximizeButton.Click += (_, _) =>
