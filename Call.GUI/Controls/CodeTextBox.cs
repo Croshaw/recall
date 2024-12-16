@@ -100,7 +100,8 @@ public class CodeTextBox : UserControl
         {
             Dock = DockStyle.Fill,
             Multiline = true,
-            BorderStyle = BorderStyle.None
+            BorderStyle = BorderStyle.None,
+            ShortcutsEnabled = true
         };
         _richTextBox.KeyDown += (s, e) =>
         {
@@ -161,5 +162,10 @@ public class CodeTextBox : UserControl
 
         Controls.Add(_richTextBox);
         Controls.Add(_lineNumbersForRtb);
+    }
+
+    public void Clear()
+    {
+        _richTextBox.Clear();
     }
 }

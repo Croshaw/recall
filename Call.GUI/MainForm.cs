@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Call.Core;
+﻿using Call.Core;
 using Call.Core.Configuration;
 using Call.Core.Utilities;
 using Call.GUI.Common;
@@ -20,6 +19,12 @@ public partial class MainForm : BorderlessForm
 
     private DataGridView TokenTable;
     private RichTextBox TokenView;
+
+    private TreePanel<string> TreePanel;
+
+    private DataGridView PolisTable;
+    private DataGridView VarsTable;
+    private DataGridView AddressTable;
 
     public MainForm()
     {
@@ -105,6 +110,24 @@ public partial class MainForm : BorderlessForm
                 }
 
             _tableWrapper.Fill(_tables);
+            TreePanel.Root = executor.Root;
+
+            PolisTable.Rows.Clear();
+            PolisTable.Columns.Clear();
+            for (var i = 0; i < executor.Polis.Count; i++)
+                PolisTable.Columns.Add(null, null);
+            PolisTable.Rows.Add(Enumerable.Range(0, executor.Polis.Count).Select(x => x.ToString()).ToArray<object>());
+            PolisTable.Rows.Add(executor.Polis.ToArray<object>());
+
+            VarsTable.Rows.Clear();
+            foreach (var (key, value) in executor.Variables)
+                VarsTable.Rows.Add(key, value.ToString());
+
+            AddressTable.Rows.Clear();
+            for (var i = 0; i < executor.Values.Count; i++)
+                AddressTable.Rows.Add(i.ToString(), executor.Values[i].ToString());
+
+
             await executor.Execute();
             stopProgram.Hide();
             isRun = false;
@@ -178,44 +201,73 @@ public partial class MainForm : BorderlessForm
         var _nodeSettings = new TreeSettings(40, 50, 50, _themeManager.Theme.ColorScheme.Text,
             _themeManager.Theme.ColorScheme.Background, _themeManager.Theme.ColorScheme.Border,
             _themeManager.Theme.ColorScheme.Border,
-            _themeManager.Theme.FontScheme.RunFont);
+            _themeManager.Theme.FontScheme.TreeFont);
 
-
-        var _root = new Node<string>("S");
-        _root.Add("T").Add("a");
-        _root.Add("+");
-        var temp = _root.Add("S");
-        temp.Add("T").Add("b");
-        temp.Add("+");
-        temp.Add("S").Add("T").Add("a");
-        var descendingTree = new TreePanel<string>()
+        var panel = new Panel()
+        {
+            Dock = DockStyle.Fill,
+            Name = "TreePanel"
+        };
+        TreePanel = new TreePanel<string>()
         {
             Dock = DockStyle.Fill,
             DrawMode = DrawMode.Descending,
-            Root = _root,
-            Settings = _nodeSettings,
-            Name = "DescendingTree"
+            // Root = _root,
+            Settings = _nodeSettings
+        };
+        var settingsPanel = new Panel()
+        {
+            Dock = DockStyle.Top
+        };
+        var comboBox = new ComboBox()
+        {
+            Items = { "Нисходящее", "Восходящее" },
+            SelectedIndex = 0,
+            Dock = DockStyle.Top,
+            ForeColor = _themeManager.Theme.ColorScheme.Text,
+            BackColor = _themeManager.Theme.ColorScheme.AltBackground,
+            FlatStyle = FlatStyle.Flat,
+            DropDownStyle = ComboBoxStyle.DropDown
+        };
+        comboBox.SelectedIndexChanged += (s, e) =>
+        {
+            if (comboBox.SelectedIndex == -1)
+                return;
+            TreePanel.DrawMode = (DrawMode)comboBox.SelectedIndex;
+        };
+        var infoLabel = new RichTextBox()
+        {
+            WordWrap = true,
+            ForeColor = _themeManager.Theme.ColorScheme.Text,
+            BackColor = _themeManager.Theme.ColorScheme.AltBackground,
+            BorderStyle = BorderStyle.None,
+            Dock = DockStyle.Fill,
+            ReadOnly = true
+        };
+        TreePanel.RootChanged += (s, e) =>
+        {
+            if (TreePanel.Root is null)
+            {
+                infoLabel.Text = "";
+                return;
+            }
+
+            var tmp = ParserUtils.GetAlph(TreePanel.Root);
+            var gram = ParserUtils.HzPra(tmp.Item1, tmp.Item2, tmp.Item3);
+            // var left = string.Join("->", ParserUtils.Left(TreePanel.Root));
+            const string left = "";
+            infoLabel.Text = $"Грамматика: G={gram}\nЛевосторонний вывод: {left}\n";
+            // $"Правосторонний вывод: {string.Join("->", ParserUtils.Right(TreePanel.Root))}\n";
         };
 
-        var _root2 = new Node<string>("S");
-        var temp2 = _root2.Add("S");
-        temp2.Add("T").Add("b");
-        temp2.Add("+");
-        temp2.Add("S").Add("T").Add("a");
-        _root2.Add("+");
-        _root2.Add("T").Add("a");
-        var risingTree = new TreePanel<string>()
-        {
-            Dock = DockStyle.Fill,
-            DrawMode = DrawMode.Rising,
-            Root = _root2,
-            Settings = _nodeSettings,
-            Name = "RisingTree"
-        };
+        settingsPanel.Controls.Add(infoLabel);
+        settingsPanel.Controls.Add(comboBox);
+        panel.Controls.Add(settingsPanel);
+        panel.Controls.Add(TreePanel);
+
 
         RightPanel.AddPage(tokenPanel);
-        RightPanel.AddPage(descendingTree);
-        RightPanel.AddPage(risingTree);
+        RightPanel.AddPage(panel);
     }
 
     private void SetupBottomPanel()
@@ -227,7 +279,47 @@ public partial class MainForm : BorderlessForm
         };
         _console = run.Console;
 
+        var panel = new TableLayoutPanel()
+        {
+            Dock = DockStyle.Fill,
+            RowCount = 1,
+            ColumnCount = 3
+        };
+        panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        panel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+
+        // var secPanel = new TableLayoutPanel()
+        // {
+        //     Dock = DockStyle.Fill,
+        //     RowCount = 2,
+        //     ColumnCount = 1
+        // };
+        // secPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
+        // secPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+        // secPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
+
+        PolisTable = CreateUtils.CreateTable(0, _themeManager);
+        PolisTable.Dock = DockStyle.Fill;
+        PolisTable.AutoSize = true;
+        PolisTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+
+
+        VarsTable = CreateUtils.CreateTable(2, _themeManager);
+        VarsTable.Dock = DockStyle.Fill;
+        VarsTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+
+        AddressTable = CreateUtils.CreateTable(2, _themeManager);
+        AddressTable.Dock = DockStyle.Fill;
+        AddressTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+
+        panel.Controls.Add(CreateUtils.WrapControlWithName(PolisTable, "Polis"));
+        panel.Controls.Add(CreateUtils.WrapControlWithName(VarsTable, "Vars"));
+        panel.Controls.Add(CreateUtils.WrapControlWithName(AddressTable, "Address"));
+
         BottomPanel.AddPage("Run", CreateUtils.WrapControlWithName(run, "Run"));
+        BottomPanel.AddPage("Polis", panel);
     }
 
     private ButtonGroup.ActiveButtonChangingHandler CreateHandler(Control control)
@@ -267,7 +359,11 @@ public partial class MainForm : BorderlessForm
         var runButton = CreateUtils.CreateIconicButton(null, "RunDark.png");
         runButton.Click += (s, e) => BottomPanel.SwitchPage("Run");
 
+        var polisButton = CreateUtils.CreateIconicButton(null, "TableDark.png");
+        polisButton.Click += (s, e) => BottomPanel.SwitchPage("Polis");
+
         buttonGroup.Add(runButton);
+        buttonGroup.Add(polisButton);
         buttonGroup.ActiveButtonChanging += handler;
         LeftBar.Controls.Add(buttonGroup);
     }
@@ -286,13 +382,13 @@ public partial class MainForm : BorderlessForm
         var tokensButton = CreateUtils.CreateIconicButton(null, "TokenDark.png");
         tokensButton.Click += (s, e) => RightPanel.SwitchPage("Tokens");
 
-        var descendingTreeButton = CreateUtils.CreateIconicButton(null, "TreeDark.png");
-        descendingTreeButton.Click += (s, e) => RightPanel.SwitchPage("DescendingTree");
+        // var descendingTreeButton = CreateUtils.CreateIconicButton(null, "TreeDark.png");
+        // descendingTreeButton.Click += (s, e) => RightPanel.SwitchPage("DescendingTree");
 
-        var risingTreeButton = CreateUtils.CreateIconicButton(null, "TreeDark.png");
-        risingTreeButton.Click += (s, e) => RightPanel.SwitchPage("RisingTree");
+        var treeButton = CreateUtils.CreateIconicButton(null, "TreeDark.png");
+        treeButton.Click += (s, e) => RightPanel.SwitchPage("TreePanel");
 
-        buttonGroup.AddRange(descendingTreeButton, risingTreeButton, tokensButton);
+        buttonGroup.AddRange(treeButton, tokensButton);
         buttonGroup.ActiveButtonChanging += handler;
         RightBar.Controls.Add(buttonGroup);
     }

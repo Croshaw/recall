@@ -22,8 +22,8 @@ public class Terminal : RichTextBox
         Console = new Console(cout, cer, cin);
         cout.OnWrite += (_, e) => { Invoke(() => AppendText(e, Color.Black)); };
         cer.OnWrite += (_, e) => { Invoke(() => AppendText(e, Color.Red)); };
-        cin.OnReadStart += () => base.ReadOnly = false;
-        cin.OnReadEnd += () => base.ReadOnly = true;
+        cin.OnReadStart += () => Invoke(() => base.ReadOnly = false);
+        cin.OnReadEnd += () => Invoke(() => base.ReadOnly = true);
     }
 
     public void Reset()
@@ -37,6 +37,12 @@ public class Terminal : RichTextBox
 
     private void AppendText(ConsoleTextWriter.WriteEventArgs args, Color color)
     {
+        if (!string.IsNullOrEmpty(args.Value) && args.Value == "clear")
+        {
+            Reset();
+            return;
+        }
+
         var start = TextLength;
         Text += args.Value;
         if (args.ActionType == ConsoleTextWriter.ActionType.WriteLine)

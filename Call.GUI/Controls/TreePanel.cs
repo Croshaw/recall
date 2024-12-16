@@ -1,5 +1,6 @@
 ﻿using Call.Core;
 using System.ComponentModel;
+using Call.Core.Syntax;
 
 namespace Call.GUI.Common;
 
@@ -11,6 +12,12 @@ public enum DrawMode
 
 public class TreePanel<T> : Panel
 {
+    private PointF _offset;
+
+    public delegate void RootChangedEventHandler(object sender, EventArgs e);
+
+    public event RootChangedEventHandler? RootChanged;
+
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     public TreeSettings Settings
     {
@@ -28,6 +35,8 @@ public class TreePanel<T> : Panel
         get => _drawMode;
         set
         {
+            if (_drawMode == value)
+                return;
             _drawMode = value;
             UpdatePositions();
         }
@@ -39,9 +48,12 @@ public class TreePanel<T> : Panel
         get => _root;
         set
         {
+            if (_root == value)
+                return;
             _root = value;
             TreeHeight = TreeUtils.GetHeight(_root) - 1;
             UpdatePositions();
+            RootChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -57,12 +69,36 @@ public class TreePanel<T> : Panel
     public TreePanel()
     {
         DoubleBuffered = true;
+        _offset = new PointF(0, 0);
+    }
+
+    private Point _lastMousePosition;
+
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        base.OnMouseDown(e);
+        if (e.Button == MouseButtons.Middle) _lastMousePosition = e.Location;
+    }
+
+    protected override void OnMouseMove(MouseEventArgs e)
+    {
+        base.OnMouseMove(e);
+        if (e.Button == MouseButtons.Middle)
+        {
+            var deltaX = e.X - _lastMousePosition.X;
+            var deltaY = e.Y - _lastMousePosition.Y;
+            _offset.X += deltaX;
+            _offset.Y += deltaY;
+            _lastMousePosition = e.Location;
+            Invalidate();
+        }
     }
 
     private void UpdatePositions()
     {
         _positions.Clear();
         if (Root is not null) CalculatePosition(Root, 0, TreeUtils.Left(Root));
+        Invalidate();
     }
 
     private void CalculatePosition(Node<T> node, int row, int col)
@@ -148,14 +184,15 @@ public class TreePanel<T> : Panel
         using var strokePen = new Pen(Settings.StrokeColor);
         using var textBrush = new SolidBrush(Settings.ForeColor);
 
-        var rows = _positions.Values.Max(pos => pos.Y);
-        var cols = _positions.Values.Max(pos => pos.X);
-        var width = cols * Settings.Offset.Width + cols * Settings.Size.Width / 4;
-        var height = rows * Settings.Offset.Height + rows * Settings.Size.Height / 2;
-
-        var startX = ClientSize.Width / 2 - width / 2;
-        var startY = ClientSize.Height / 2 - height / 2;
-        DrawNode(e.Graphics, Root, startX, startY, linePen, fillBrush, strokePen, textBrush);
+        // var rows = _positions.Values.Max(pos => pos.Y);
+        // var cols = _positions.Values.Max(pos => pos.X);
+        // var width = cols * Settings.Offset.Width + cols * Settings.Size.Width / 4;
+        // var height = rows * Settings.Offset.Height + rows * Settings.Size.Height / 2;
+        //
+        // var startX = ClientSize.Width / 2 - width / 2;
+        // var startY = ClientSize.Height / 2 - height / 2;
+        // _offset = new PointF(startX, startY);
+        DrawNode(e.Graphics, Root, _offset.X, _offset.Y, linePen, fillBrush, strokePen, textBrush);
     }
 
     protected override void OnResize(EventArgs eventargs)

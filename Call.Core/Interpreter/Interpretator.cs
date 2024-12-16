@@ -49,7 +49,7 @@ public class Interpretator
                         {
                             var second = _stack.Pop();
                             var first = _stack.Pop();
-                            _values[first.Address] = _values[second.Address];
+                            _values[first.Address] = UniValue.Assign(_values[first.Address], _values[second.Address]);
                             break;
                         }
                         case SpecialAction.SpecialActionType.JumpIfFalse:
@@ -57,7 +57,7 @@ public class Interpretator
                             var address = _stack.Pop();
                             var valueAddress = _stack.Pop();
                             if (!_values[valueAddress.Address].GetBoolValue())
-                                i = address.Address;
+                                i = address.Address - 1;
                             break;
                         }
                         case SpecialAction.SpecialActionType.JumpIfTrue:
@@ -65,13 +65,13 @@ public class Interpretator
                             var address = _stack.Pop();
                             var valueAddress = _stack.Pop();
                             if (_values[valueAddress.Address].GetBoolValue())
-                                i = address.Address;
+                                i = address.Address - 1;
                             break;
                         }
                         case SpecialAction.SpecialActionType.Jump:
                         {
                             var address = _stack.Pop();
-                            i = address.Address;
+                            i = address.Address - 1;
                             break;
                         }
                         case SpecialAction.SpecialActionType.Print:
@@ -89,13 +89,34 @@ public class Interpretator
                             _stack.Clear();
                             break;
                         case SpecialAction.SpecialActionType.Read:
-                            while (_stack.Count > 0)
+                            temp = _stack.ToArray();
+                            for (var j = temp.Length - 1; j >= 0; j--)
                             {
-                                var address = _stack.Pop();
                                 var line = _console.CIN.ReadLine();
-                                var temp1 = UniValue.Parse(line);
-                                _values[address.Address] = temp1;
+                                var numbers = line.Split(" ").Take(temp.Length).ToArray();
+                                for (var b = 0; b < numbers.Length; b++)
+                                {
+                                    var address = temp[j];
+                                    var number = numbers[b].Trim(' ');
+                                    if (UniValue.TryParse(number, out var value))
+                                    {
+                                        _values[address.Address] = UniValue.Assign(_values[address.Address], value);
+                                        j--;
+                                    }
+                                }
+
+                                j++;
                             }
+
+                            _stack.Clear();
+
+                            // while (_stack.Count > 0)
+                            // {
+                            //     var address = _stack.Pop();
+                            //     var line = _console.CIN.ReadLine();
+                            //     var temp1 = UniValue.Parse(line);
+                            //     _values[address.Address] = temp1;
+                            // }
 
                             break;
                     }

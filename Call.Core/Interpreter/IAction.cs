@@ -3,9 +3,11 @@
 public class UnaryOperatorAction
 {
     private readonly Func<UniValue, UniValue> _function;
+    public string Operator { get; }
 
     public UnaryOperatorAction(string @operator)
     {
+        Operator = @operator;
         switch (@operator)
         {
             case "not":
@@ -23,9 +25,11 @@ public class UnaryOperatorAction
 public class OperatorAction
 {
     private readonly Func<UniValue, UniValue, UniValue> _function = null!;
+    public string Operator { get; }
 
     public OperatorAction(string @operator)
     {
+        Operator = @operator;
         _function = @operator switch
         {
             "+" => (a, b) => a + b,
@@ -77,7 +81,8 @@ public class SpecialAction
         Jump,
         Print,
         Read,
-        Assign
+        Assign,
+        None
     }
 
     public SpecialActionType Type { get; }

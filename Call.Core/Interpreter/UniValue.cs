@@ -56,6 +56,11 @@ public readonly struct UniValue
         _raw = raw ? 1 : 0;
     }
 
+    public static UniValue Assign(UniValue left, UniValue right)
+    {
+        return new UniValue(right._raw, left.Kind);
+    }
+
     public object GetValue()
     {
         return Kind switch
@@ -64,6 +69,11 @@ public readonly struct UniValue
             ValueKind.Integer => (int)_raw,
             ValueKind.Boolean => _raw >= 1.0
         };
+    }
+
+    public override string ToString()
+    {
+        return GetValue().ToString()!;
     }
 
     public int GetIntValue()
@@ -193,6 +203,21 @@ public readonly struct UniValue
         return value.GetBoolValue();
     }
 
+    public static bool TryParse(string value, out UniValue result)
+    {
+        try
+        {
+            result = Parse(value);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            result = new UniValue(0);
+        }
+
+        return false;
+    }
+
     public static UniValue Parse(string value)
     {
         if (value == "true")
@@ -200,18 +225,21 @@ public readonly struct UniValue
         if (value == "false")
             return false;
         var last = value.Last();
+        var number = char.IsLetter(value.Last()) ? value[..^1] : value;
+        if (string.IsNullOrEmpty(number) || (number.Length == 1 && char.IsLetter(number[0])))
+            number = "0";
         switch (last)
         {
             case 'd':
-                return new UniValue(int.Parse(value.Substring(0, value.Length - 1)));
+                return new UniValue(int.Parse(number));
             case 'h':
-                return new UniValue(Convert.ToInt32(value.Substring(0, value.Length - 1), 16));
+                return new UniValue(Convert.ToInt32(number, 16));
             case 'b':
-                return new UniValue(Convert.ToInt32(value.Substring(0, value.Length - 1), 2));
+                return new UniValue(Convert.ToInt32(number, 2));
             case 'o':
-                return new UniValue(Convert.ToInt32(value.Substring(0, value.Length - 1), 8));
+                return new UniValue(Convert.ToInt32(number, 8));
             default:
-                return new UniValue(double.Parse(value));
+                return new UniValue(double.Parse(number));
         }
     }
 }

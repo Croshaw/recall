@@ -1,4 +1,5 @@
-﻿using Call.Core.Configuration;
+﻿using System.Diagnostics;
+using Call.Core.Configuration;
 using Call.Core.Interpreter;
 using Call.Core.Lexing;
 using Call.Core.Utilities;
@@ -30,12 +31,18 @@ public class Syntaxer
         _variables = [];
         _values = [];
         Read();
-        Start();
     }
 
     public IReadOnlyList<object> Actions => _actions;
     public IReadOnlyDictionary<string, int> Variables => _variables;
     public List<UniValue> Values => _values;
+
+    private Node<string> CreateNode()
+    {
+        var stackTrace = new StackTrace();
+        var frame = stackTrace.GetFrame(1);
+        return new Node<string>(frame?.GetMethod()?.Name ?? "");
+    }
 
     private void PrintError(ErrorType errorType, string expected)
     {
@@ -91,106 +98,126 @@ public class Syntaxer
         }
     }
 
-    private bool Value()
+    private (Node<string>, bool) Value()
     {
+        var node = CreateNode();
         if (Equal("not"))
         {
             ReadNext();
-            Value();
+            node.Add(_tokenValue);
+            node.Add(Value().Item1);
             _actions.Add(new UnaryOperatorAction("not"));
-            return true;
+            return (node, true);
         }
 
         if (Equal("true") || Equal("false") || Equal(TableType.Numbers))
         {
+            node.Add(_tokenValue);
             try
             {
                 _values.Add(UniValue.Parse(_tokenValue));
                 _actions.Add(new AddressAction(AddressAction.AddressType.Value, _values.Count - 1));
-                return true;
+                return (node, true);
             }
             catch (Exception ex)
             {
                 _console.CER.WriteLine(ex.Message);
             }
 
-            return false;
+            return (node, false);
         }
 
         if (Equal(TableType.Identifiers))
         {
+            node.Add(_tokenValue);
             if (!_variables.ContainsKey(_tokenValue))
                 PrintError(ErrorType.Undeclared, _tokenValue);
             else
                 _actions.Add(new AddressAction(AddressAction.AddressType.Value, _variables[_tokenValue]));
-            return true;
+            return (node, true);
         }
 
         if (Equal("("))
         {
+            node.Add(_tokenValue);
             ReadNext();
-            Compare();
+            node.Add(Compare().Item1);
             if (!Equal(")"))
                 PrintError(ErrorType.Expected, _tokenValue);
-            return true;
+            node.Add(_tokenValue);
+            return (node, true);
         }
 
-        return false;
+        return (node, false);
     }
 
-    private bool Compare()
+    private (Node<string>, bool) Compare()
     {
-        if (Value())
+        var node = CreateNode();
+        var temp = Value();
+        node.Add(temp.Item1);
+        if (temp.Item2)
         {
             ReadNext();
             if (Equal("*") || Equal("/") || Equal("and") || Equal("+") || Equal("-") || Equal("or") || Equal("=") ||
                 Equal("<>") || Equal(">") || Equal("<") || Equal(">=") || Equal("<="))
             {
+                node.Add(_tokenValue);
                 var @operator = _tokenValue;
                 ReadNext();
-                if (Compare())
+                temp = Compare();
+                node.Add(temp.Item1);
+                if (temp.Item2)
                     _actions.Add(new OperatorAction(@operator));
             }
 
-            return true;
+            return (node, true);
         }
 
-        return false;
+        return (node, false);
     }
 
-    private void Assign()
+    private Node<string> Assign()
     {
+        var node = CreateNode();
         if (!Equal(TableType.Identifiers))
         {
             PrintError(ErrorType.Expected, "identifier");
-            return;
+            return node;
         }
+
+        node.Add(_tokenValue);
 
         if (!_variables.ContainsKey(_tokenValue))
         {
             PrintError(ErrorType.Undeclared, _tokenValue);
-            return;
+            return node;
         }
 
         _actions.Add(new AddressAction(AddressAction.AddressType.Value, _variables[_tokenValue]));
         ReadNext();
+        node.Add(_tokenValue);
         ReadNextIfEqualElseThrow("as");
-        Compare();
+        node.Add(Compare().Item1);
         _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Assign));
+        return node;
     }
 
-    private void Identifiers()
+    private Node<string> Identifiers()
     {
+        var node = CreateNode();
         if (!Equal(TableType.Identifiers))
         {
             PrintError(ErrorType.Expected, "identifier");
-            return;
+            return node;
         }
+
+        node.Add(_tokenValue);
 
         if (!_variables.ContainsKey(_tokenValue))
         {
             PrintError(ErrorType.Undeclared, _tokenValue);
-            return;
+            return node;
         }
 
         _actions.Add(new AddressAction(AddressAction.AddressType.Value, _variables[_tokenValue]));
@@ -201,72 +228,82 @@ public class Syntaxer
             if (!Equal(TableType.Identifiers))
             {
                 PrintError(ErrorType.Expected, "identifier");
-                return;
+                return node;
             }
 
+            node.Add(_tokenValue);
             if (!_variables.ContainsKey(_tokenValue))
             {
                 PrintError(ErrorType.Undeclared, _tokenValue);
-                return;
+                return node;
             }
 
             _actions.Add(new AddressAction(AddressAction.AddressType.Value, _variables[_tokenValue]));
             ReadNext();
         }
+
+        return node;
     }
 
-    private void Start()
+    public Node<string> Start()
     {
+        var node = CreateNode();
         try
         {
             ReadNextIfEqualElseThrow("program");
-            Vars();
-            Body();
+            node.Add(Vars());
+            node.Add(Body());
         }
         catch (Exception ex)
         {
             _console.CER.WriteLine(ex.Message);
         }
+
+        return node;
     }
 
-    private void Expression()
+    private Node<string> Expression()
     {
-        Compare();
+        var node = CreateNode();
+        node.Add(Compare().Item1);
         while (Equal(","))
         {
             ReadNext();
-            Compare();
+            node.Add(Compare().Item1);
         }
+
+        return node;
     }
 
-    private void Oper()
+    private Node<string> Oper()
     {
+        var node = CreateNode();
         if (Equal("["))
         {
             ReadNext();
-            OperatorCycle([":", "\n"]);
+            node.Add(OperatorCycle([":", "\n"]));
             if (!Equal("]"))
                 PrintError(ErrorType.Expected, "]");
             else
                 ReadNext();
-            return;
+            return node;
         }
 
         if (Equal("if"))
         {
             ReadNext();
-            Compare();
+            node.Add(Compare().Item1);
             var jif_id = _actions.Count;
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.JumpIfFalse));
             ReadNextIfEqualElseThrow("then");
-            Oper();
+            node.Add(Oper());
             if (Equal("else"))
             {
                 _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Jump));
                 var j_id = _actions.Count;
                 _actions.Insert(jif_id, new AddressAction(AddressAction.AddressType.Instruction, _actions.Count + 2));
                 ReadNext();
-                Oper();
+                node.Add(Oper());
                 _actions.Insert(j_id, new AddressAction(AddressAction.AddressType.Instruction, _actions.Count + 1));
             }
             else
@@ -274,93 +311,103 @@ public class Syntaxer
                 _actions.Insert(jif_id, new AddressAction(AddressAction.AddressType.Instruction, _actions.Count + 1));
             }
 
-            return;
+            return node;
         }
 
         if (Equal("while"))
         {
             ReadNext();
             var jId = _actions.Count;
-            Compare();
+            node.Add(Compare().Item1);
             var jifId = _actions.Count;
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.JumpIfFalse));
             ReadNextIfEqualElseThrow("do");
-            Oper();
+            node.Add(Oper());
             _actions.Add(new AddressAction(AddressAction.AddressType.Instruction, jId));
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Jump));
             _actions.Insert(jifId, new AddressAction(AddressAction.AddressType.Instruction, _actions.Count));
-            return;
+            return node;
         }
 
         if (Equal("for"))
         {
             ReadNext();
             var jTo = _actions.Count;
-            Assign();
+            node.Add(Assign());
             ReadNextIfEqualElseThrow("to");
-            Compare();
+            node.Add(Compare().Item1);
             var jifFrom = _actions.Count;
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.JumpIfFalse));
             ReadNextIfEqualElseThrow("do");
 
-            Oper();
+            node.Add(Oper());
             _actions.Add(new AddressAction(AddressAction.AddressType.Instruction, jTo));
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Jump));
             _actions.Insert(jifFrom, new AddressAction(AddressAction.AddressType.Instruction, _actions.Count + 1));
-            return;
+            return node;
         }
 
         if (Equal("read"))
         {
             ReadNext();
             ReadNextIfEqualElseThrow("(");
-            Identifiers();
+            node.Add(Identifiers());
             ReadNextIfEqualElseThrow(")");
 
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Read));
-            return;
+            return node;
         }
 
         if (Equal("write"))
         {
             ReadNext();
             ReadNextIfEqualElseThrow("(");
-            Expression();
+            node.Add(Expression());
             ReadNextIfEqualElseThrow(")");
 
             _actions.Add(new SpecialAction(SpecialAction.SpecialActionType.Print));
-            return;
+            return node;
         }
 
-        Assign();
+        node.Add(Assign());
+        return node;
     }
 
-    private void OperatorCycle(HashSet<string> separators)
+    private Node<string> OperatorCycle(HashSet<string> separators)
     {
-        Oper();
+        var node = CreateNode();
+        node.Add(Oper());
         while (separators.Contains(_tokenValue))
         {
             ReadNext();
-            Oper();
+            node.Add(Oper());
         }
+
+        return node;
     }
 
-    private void Vars()
+    private Node<string> Vars()
     {
+        var node = CreateNode();
         ReadNextIfEqualElseThrow("var");
 
         do
         {
             if (Equal("begin"))
-                return;
-            if (!Description())
+                return node;
+            var temp = Description();
+            node.Add(temp.Item1);
+            if (!temp.Item2)
                 break;
             ReadNext();
         } while (Equal(";"));
+
+        return node;
     }
 
-    private bool Description()
+    private (Node<string>, bool) Description()
     {
+        var node = CreateNode();
         if (Equal("int") || Equal("float") || Equal("bool"))
         {
             var kind = _tokenValue switch
@@ -378,7 +425,7 @@ public class Syntaxer
                 if (!Equal(TableType.Identifiers))
                 {
                     PrintError(ErrorType.Expected, "identifier");
-                    return false;
+                    return (node, true);
                 }
                 else
                 {
@@ -396,17 +443,19 @@ public class Syntaxer
                 ReadNext();
             } while (Equal(","));
 
-            return true;
+            return (node, true);
         }
 
-        return false;
+        return (node, false);
     }
 
-    private void Body()
+    private Node<string> Body()
     {
+        var node = CreateNode();
         ReadNextIfEqualElseThrow("begin");
-        OperatorCycle([";"]);
+        node.Add(OperatorCycle([";"]));
         ReadNextIfEqualElseThrow("end");
         ReadNextIfEqualElseThrow(".");
+        return node;
     }
 }
