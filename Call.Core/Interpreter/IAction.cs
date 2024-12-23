@@ -20,6 +20,11 @@ public class UnaryOperatorAction
     {
         return _function(value);
     }
+
+    public override string ToString()
+    {
+        return Operator;
+    }
 }
 
 public class OperatorAction
@@ -52,6 +57,11 @@ public class OperatorAction
     {
         return _function(x, y);
     }
+
+    public override string ToString()
+    {
+        return Operator;
+    }
 }
 
 public class AddressAction
@@ -69,6 +79,11 @@ public class AddressAction
     {
         Type = type;
         Address = address;
+    }
+
+    public override string ToString()
+    {
+        return $"{Type} : {Address}";
     }
 }
 
@@ -90,5 +105,10 @@ public class SpecialAction
     public SpecialAction(SpecialActionType type)
     {
         Type = type;
+    }
+
+    public override string ToString()
+    {
+        return Type.ToString();
     }
 }

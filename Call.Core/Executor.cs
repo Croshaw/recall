@@ -31,20 +31,20 @@ public class Executor
         _lexer = new Lexer(source, settings, console);
         Tables = settings.Tables;
         Tokens = _lexer.Tokens;
-        _parser = new Parser(settings, Tokens, console);
-        Root = _parser.Pr();
-        List<string> actions = [];
-        foreach (var action in _parser.Actions)
-            if (action is AddressAction addressAction)
-                actions.Add($"{addressAction.Type} : {addressAction.Address}");
-            else if (action is OperatorAction operatorAction)
-                actions.Add(operatorAction.Operator);
-            else if (action is UnaryOperatorAction unaryOperatorAction)
-                actions.Add(unaryOperatorAction.Operator);
-            else if (action is SpecialAction specialAction) actions.Add(specialAction.Type.ToString());
-        Variables = _parser.Variables;
-        Values = _parser.Values;
-        Polis = actions;
+        // _parser = new Parser(settings, Tokens, console);
+        // Root = _parser.Pr();
+        // List<string> actions = [];
+        // foreach (var action in _parser.Actions)
+        //     if (action is AddressAction addressAction)
+        //         actions.Add($"{addressAction.Type} : {addressAction.Address}");
+        //     else if (action is OperatorAction operatorAction)
+        //         actions.Add(operatorAction.Operator);
+        //     else if (action is UnaryOperatorAction unaryOperatorAction)
+        //         actions.Add(unaryOperatorAction.Operator);
+        //     else if (action is SpecialAction specialAction) actions.Add(specialAction.Type.ToString());
+        // Variables = _parser.Variables;
+        // Values = _parser.Values;
+        // Polis = actions;
     }
 
     public Task Execute()
@@ -53,7 +53,7 @@ public class Executor
         {
             if (_lexer.HasErrors || _parser.HasErrors)
                 return;
-            Interpretator.Execute(_parser.Actions, _parser.Variables, _parser.Values, _console);
+            // Interpretator.Execute(_parser.Actions, _parser.Variables, _parser.Values, _console);
         });
     }
 

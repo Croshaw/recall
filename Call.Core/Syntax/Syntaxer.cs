@@ -48,7 +48,7 @@ public class Syntaxer
     {
         if (!HasErrors)
             HasErrors = true;
-        _console.CER.WriteLine(Error.GetMesg(errorType, expected, _currentToken.Position));
+        _console.CER.WriteLine(Error.GetMessage(errorType, expected, _currentToken.Position));
     }
 
     private bool Equal(string value)
@@ -391,16 +391,16 @@ public class Syntaxer
         var node = CreateNode();
         ReadNextIfEqualElseThrow("var");
 
-        do
+        while (true)
         {
             if (Equal("begin"))
-                return node;
+                break;
             var temp = Description();
             node.Add(temp.Item1);
-            if (!temp.Item2)
+            if (!temp.Item2 || !Equal(";"))
                 break;
             ReadNext();
-        } while (Equal(";"));
+        }
 
         return node;
     }
@@ -408,45 +408,41 @@ public class Syntaxer
     private (Node<string>, bool) Description()
     {
         var node = CreateNode();
-        if (Equal("int") || Equal("float") || Equal("bool"))
+        if (!Equal("int") && !Equal("float") && !Equal("bool")) return (node, false);
+        var kind = _tokenValue switch
         {
-            var kind = _tokenValue switch
+            "int" => ValueKind.Integer,
+            "float" => ValueKind.Double,
+            "bool" => ValueKind.Boolean,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        if (!_kinds.Add(kind))
+            PrintError(ErrorType.Redefinition, _tokenValue);
+        do
+        {
+            ReadNext();
+            if (!Equal(TableType.Identifiers))
             {
-                "int" => ValueKind.Integer,
-                "float" => ValueKind.Double,
-                "bool" => ValueKind.Boolean,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-            if (!_kinds.Add(kind))
-                PrintError(ErrorType.Redefinition, _tokenValue);
-            do
+                PrintError(ErrorType.Expected, "identifier");
+                return (node, true);
+            }
+            else
             {
-                ReadNext();
-                if (!Equal(TableType.Identifiers))
+                if (_variables.ContainsKey(_tokenValue))
                 {
-                    PrintError(ErrorType.Expected, "identifier");
-                    return (node, true);
+                    PrintError(ErrorType.Redefinition, _tokenValue);
                 }
                 else
                 {
-                    if (_variables.ContainsKey(_tokenValue))
-                    {
-                        PrintError(ErrorType.Redefinition, _tokenValue);
-                    }
-                    else
-                    {
-                        _variables[_tokenValue] = _values.Count;
-                        _values.Add(new UniValue(kind));
-                    }
+                    _variables[_tokenValue] = _values.Count;
+                    _values.Add(new UniValue(kind));
                 }
+            }
 
-                ReadNext();
-            } while (Equal(","));
+            ReadNext();
+        } while (Equal(","));
 
-            return (node, true);
-        }
-
-        return (node, false);
+        return (node, true);
     }
 
     private Node<string> Body()

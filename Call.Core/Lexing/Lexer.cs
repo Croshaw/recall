@@ -70,16 +70,24 @@ public class Lexer
     {
         if (!HasErrors)
             HasErrors = true;
-        _console.CER.WriteLine(Error.GetMesg(ErrorType.Unknown, _source.Substring(_start, _index - _start), _position));
+        _console.CER.WriteLine(Error.GetMessage(ErrorType.Unknown, _source.Substring(_start, _index - _start),
+            _position));
     }
 
     private void CreateToken()
     {
-        if (string.IsNullOrEmpty(_lexem))
+        if (string.IsNullOrEmpty(_lexem) || (_lexem == "\n" && _tokens.Count == 0))
             return;
         _position = new Position(_position.Row, _start - _position.Absolute + _position.Column,
             Math.Max(_index - _start - 1, 1),
             _start);
+        if ((_state.HasFlag(State.Exp) && !_state.HasFlag(State.Por)) ||
+            (_state.HasFlag(State.Por) && !char.IsDigit(_lexem.Last())))
+        {
+            PrintError();
+            return;
+        }
+
         if (_state.IsNum())
         {
             if (!_state.HasFlag(State.NumEnd))
@@ -137,7 +145,9 @@ public class Lexer
             return State.Sep;
         }
 
-        return State.Word;
+        if (IsLetter() || IsNumber())
+            return State.Word;
+        return State.Error;
     }
 
     private State SepStateProcessing()
@@ -167,7 +177,7 @@ public class Lexer
 
     private State NumberStateProcessing()
     {
-        if (IsSep())
+        if (_cur != '.' && !(_cur is '+' or '-' && _state.HasFlag(State.Exp) && !_state.HasFlag(State.Por)) && IsSep())
         {
             CreateToken();
             Reset();
@@ -223,9 +233,7 @@ public class Lexer
 
                         if (_state.HasFlag(State.Dec))
                             return State.Exp | State.Hex;
-                        if (_state.HasFlag(State.Float))
-                            return State.Exp;
-                        return _state;
+                        return _state.HasFlag(State.Float) ? State.Exp : _state;
                     case 'h':
                         if (_state.HasAnyFlags(State.Bin, State.Oct, State.Dec, State.Hex))
                             return State.Hex | State.NumEnd;
@@ -295,9 +303,27 @@ public class Lexer
     private void Parse()
     {
         Reset();
+        var commentInd = 0;
         while (_index < _source.Length)
         {
             Read();
+            if (_cur == '{')
+            {
+                commentInd++;
+                if (!string.IsNullOrEmpty(_lexem))
+                {
+                    CreateToken();
+                    Reset();
+                }
+            }
+            else if (_cur == '}' && commentInd > 0)
+            {
+                commentInd--;
+                continue;
+            }
+
+            if (commentInd > 0)
+                continue;
             switch (_cur)
             {
                 case ' ':

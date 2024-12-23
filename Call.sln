@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Call.Core", "Call.Core\Call
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Call.GUI", "Call.GUI\Call.GUI.csproj", "{7ED76F5B-1C39-49E3-9A20-91B1838B1213}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Call.Test", "Call.Test\Call.Test.csproj", "{A67A8D4F-61D8-4A50-BCF6-E6CFB53CC323}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{7ED76F5B-1C39-49E3-9A20-91B1838B1213}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7ED76F5B-1C39-49E3-9A20-91B1838B1213}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7ED76F5B-1C39-49E3-9A20-91B1838B1213}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A67A8D4F-61D8-4A50-BCF6-E6CFB53CC323}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A67A8D4F-61D8-4A50-BCF6-E6CFB53CC323}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A67A8D4F-61D8-4A50-BCF6-E6CFB53CC323}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A67A8D4F-61D8-4A50-BCF6-E6CFB53CC323}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

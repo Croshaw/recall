@@ -31,7 +31,8 @@ public class Parser
         _variables = [];
         _values = [];
         _index = -1;
-        ReadNext();
+        if (_tokens.Count > 0)
+            ReadNext();
     }
 
     public IReadOnlyList<object> Actions => _actions;
@@ -42,7 +43,8 @@ public class Parser
     {
         if (!HasErrors)
             HasErrors = true;
-        _console.CER.WriteLine(Error.GetMesg(errorType, expected, pos.HasValue ? pos!.Value : _currentToken.Position));
+        _console.CER.WriteLine(
+            Error.GetMessage(errorType, expected, pos.HasValue ? pos!.Value : _currentToken.Position));
     }
 
     private bool Equal(string value)
@@ -249,8 +251,15 @@ public class Parser
 
     private void AddValue(string value)
     {
-        _values.Add(UniValue.Parse(value));
-        AddAction(AddressAction.AddressType.Value, _values.Count - 1);
+        if (!UniValue.TryParse(value, out var result, out var type))
+        {
+            PrintError(type, value);
+        }
+        else
+        {
+            _values.Add(result);
+            AddAction(AddressAction.AddressType.Value, _values.Count - 1);
+        }
     }
 
     public Node<string> Pr()
@@ -389,8 +398,10 @@ public class Parser
     private void If(Node<string> node)
     {
         ReadNextIfEqualElseThrow("if", node);
-        node.Add(Compare());
-
+        var res = Compare();
+        node.Add(res.node);
+        if (!res.isCompare)
+            PrintError(ErrorType.Unknown, "Not Compare");
         var jif_id = _actions.Count;
         AddAction(SpecialAction.SpecialActionType.JumpIfFalse);
 
@@ -414,7 +425,10 @@ public class Parser
     {
         ReadNextIfEqualElseThrow("while", node);
         var jId = _actions.Count;
-        node.Add(Compare());
+        var res = Compare();
+        if (!res.isCompare)
+            PrintError(ErrorType.Unknown, "Not Compare");
+        node.Add(res.node);
         var jifId = _actions.Count;
         AddAction(SpecialAction.SpecialActionType.JumpIfFalse);
         ReadNextIfEqualElseThrow("do", node);
@@ -430,7 +444,10 @@ public class Parser
         var jTo = _actions.Count;
         node.Add(Assign());
         ReadNextIfEqualElseThrow("to", node);
-        node.Add(Compare());
+        var res = Compare();
+        if (!res.isCompare)
+            PrintError(ErrorType.Unknown, "Not Compare");
+        node.Add(res.node);
         var jifFrom = _actions.Count;
         AddAction(SpecialAction.SpecialActionType.JumpIfFalse);
         ReadNextIfEqualElseThrow("do", node);
@@ -517,7 +534,7 @@ public class Parser
         var node = ParserUtils.CreateNode();
         Id(node);
         ReadNextIfEqualElseThrow("as", node);
-        node.Add(Compare());
+        node.Add(Compare().node);
         AddAction(SpecialAction.SpecialActionType.Assign);
         return node;
     }
@@ -527,7 +544,7 @@ public class Parser
         var node = ParserUtils.CreateNode();
         while (true)
         {
-            node.Add(Compare());
+            node.Add(Compare().node);
             if (!ReadNextIfEqual(","))
                 break;
         }
@@ -535,15 +552,15 @@ public class Parser
         return node;
     }
 
-    public Node<string> Compare()
+    public (Node<string> node, bool isCompare) Compare()
     {
         var node = ParserUtils.CreateNode();
         node.Add(Add());
         var token = _tokenValue;
-        if (!ReadNextIfEqual(node, "=", ">", "<", "<>", "<=", ">=")) return node;
-        node.Add(Compare());
+        if (!ReadNextIfEqual(node, "=", ">", "<", "<>", "<=", ">=")) return (node, false);
+        node.Add(Compare().node);
         AddAction(token);
-        return node;
+        return (node, true);
     }
 
     public Node<string> Add()
@@ -586,7 +603,7 @@ public class Parser
 
         if (ReadNextIfEqual("(", node))
         {
-            node.Add(Compare());
+            node.Add(Compare().node);
             ReadNextIfEqualElseThrow(")", node);
             return node;
         }

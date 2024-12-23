@@ -25,9 +25,7 @@ public static class CreateUtils
     {
         var button = new Button()
         {
-            Text = text ?? "",
-            FlatStyle = FlatStyle.Flat,
-            FlatAppearance = { BorderSize = 0 }
+            Text = text ?? ""
         };
         return button;
     }
@@ -40,18 +38,12 @@ public static class CreateUtils
         return button;
     }
 
-    public static DataGridView CreateTable(int columns, ThemeManager themeManager)
+    public static DataGridView CreateTable(int columns)
     {
         var dgv = new DataGridView()
         {
             Dock = DockStyle.Fill
         };
-        dgv.DefaultCellStyle.BackColor = themeManager.Theme.ColorScheme.Background;
-        dgv.DefaultCellStyle.SelectionBackColor = themeManager.Theme.ColorScheme.Background;
-        dgv.BorderStyle = BorderStyle.None;
-        dgv.BackgroundColor = themeManager.Theme.ColorScheme.AltBackground;
-        dgv.GridColor = themeManager.Theme.ColorScheme.Border;
-        dgv.ForeColor = themeManager.Theme.ColorScheme.Text;
 
         dgv.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         dgv.ReadOnly = true;
@@ -83,38 +75,6 @@ public static class CreateUtils
 
 public static class ModifyUtils
 {
-    public static void SetupTablePanel(TableLayoutPanel tablePanel, TableWrapper wrapper, ThemeManager themeManager)
-    {
-        var reserved = CreateUtils.CreateTable(2, themeManager);
-        var sep = CreateUtils.CreateTable(2, themeManager);
-        var num = CreateUtils.CreateTable(2, themeManager);
-        var id = CreateUtils.CreateTable(2, themeManager);
-        reserved.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-        reserved.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        sep.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-        sep.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        num.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-        num.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        id.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-        id.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-        wrapper.Add(TableType.Reserved, reserved);
-        wrapper.Add(TableType.Separators, sep);
-        wrapper.Add(TableType.Numbers, num);
-        wrapper.Add(TableType.Identifiers, id);
-        tablePanel.Dock = DockStyle.Fill;
-        tablePanel.ColumnCount = 1;
-        tablePanel.RowCount = 4;
-        tablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        tablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-        tablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-        tablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-        tablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 25f));
-        tablePanel.Controls.Add(CreateUtils.WrapControlWithName(reserved, "Reserved"), 0, 0);
-        tablePanel.Controls.Add(CreateUtils.WrapControlWithName(sep, "Separators"), 0, 1);
-        tablePanel.Controls.Add(CreateUtils.WrapControlWithName(num, "Numbers"), 0, 2);
-        tablePanel.Controls.Add(CreateUtils.WrapControlWithName(id, "Identifiers"), 0, 3);
-    }
-
     public static void LinkSeparatorToControl(Control separator, Control target)
     {
         var horizontal = separator.Dock is DockStyle.Left or DockStyle.Right;

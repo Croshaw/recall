@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Call.Core.Utilities;
 
 namespace Call.Core.Interpreter;
 
@@ -203,18 +204,24 @@ public readonly struct UniValue
         return value.GetBoolValue();
     }
 
-    public static bool TryParse(string value, out UniValue result)
+    public static bool TryParse(string value, out UniValue result, out ErrorType errorType)
     {
         try
         {
             result = Parse(value);
+            errorType = ErrorType.None;
             return true;
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            errorType = ErrorType.OutOfRange;
         }
         catch (Exception ex)
         {
-            result = new UniValue(0);
+            errorType = ErrorType.NotValidNumber;
         }
 
+        result = new UniValue(0);
         return false;
     }
 
@@ -239,7 +246,7 @@ public readonly struct UniValue
             case 'o':
                 return new UniValue(Convert.ToInt32(number, 8));
             default:
-                return new UniValue(double.Parse(number));
+                return new UniValue(double.Parse(number, CultureInfo.InvariantCulture));
         }
     }
 }

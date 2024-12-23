@@ -22,4 +22,37 @@ public class ThemeManager
             ThemeChanged?.Invoke(this, _theme);
         }
     }
+
+    public void ApplyTheme(Control control, bool primary)
+    {
+        var backColor = primary
+            ? Theme.ColorScheme.Background
+            : Theme.ColorScheme.AltBackground;
+        var textColor = primary
+            ? Theme.ColorScheme.Text
+            : Theme.ColorScheme.AltText;
+        control.ForeColor = textColor;
+        control.BackColor = backColor;
+        switch (control)
+        {
+            case DataGridView dgv:
+                dgv.BorderStyle = BorderStyle.None;
+                dgv.DefaultCellStyle.BackColor = backColor;
+                dgv.DefaultCellStyle.SelectionBackColor = backColor;
+                dgv.DefaultCellStyle.SelectionForeColor = textColor;
+                dgv.GridColor = Theme.ColorScheme.Border;
+                dgv.BackgroundColor = backColor;
+                break;
+            case Button button:
+                button.FlatStyle = FlatStyle.Flat;
+                button.FlatAppearance.BorderSize = 0;
+                break;
+        }
+    }
+
+    public void SetupControl(Control control, bool primary)
+    {
+        ApplyTheme(control, primary);
+        ThemeChanged += (_, _) => ApplyTheme(control, primary);
+    }
 }
