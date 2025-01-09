@@ -224,6 +224,13 @@ public class Parser
         return result;
     }
 
+    private AddressAction AddEmptyInstructionAction()
+    {
+        var result = new AddressAction(AddressAction.AddressType.Instruction, _actions.Count);
+        _actions.Add(result);
+        return result;
+    }
+
     private void AddAction(SpecialAction.SpecialActionType specialActionType)
     {
         _actions.Add(new SpecialAction(specialActionType));
@@ -279,7 +286,8 @@ public class Parser
 
     private void Vars()
     {
-        ReadNextIfEqualElseThrow("var");
+        if (!ReadNextIfEqual("var"))
+            return;
         while (true)
         {
             if (Equal("begin"))
@@ -402,22 +410,22 @@ public class Parser
         node.Add(res.node);
         if (!res.isCompare)
             PrintError(ErrorType.Unknown, "Not Compare");
-        var jif_id = _actions.Count;
+        var jif = AddEmptyInstructionAction();
         AddAction(SpecialAction.SpecialActionType.JumpIfFalse);
 
         ReadNextIfEqualElseThrow("then", node);
         node.Add(Oper());
         if (ReadNextIfEqual("else", node))
         {
+            var jump = AddEmptyInstructionAction();
             AddAction(SpecialAction.SpecialActionType.Jump);
-            var j_id = _actions.Count;
-            InsertAction(jif_id, AddressAction.AddressType.Instruction, _actions.Count + 2);
+            jif.Address = _actions.Count;
             node.Add(Oper());
-            InsertAction(j_id, AddressAction.AddressType.Instruction, _actions.Count + 1);
+            jump.Address = _actions.Count;
         }
         else
         {
-            InsertAction(jif_id, AddressAction.AddressType.Instruction, _actions.Count + 1);
+            jif.Address = _actions.Count;
         }
     }
 
@@ -429,13 +437,13 @@ public class Parser
         if (!res.isCompare)
             PrintError(ErrorType.Unknown, "Not Compare");
         node.Add(res.node);
-        var jifId = _actions.Count;
+        var jif = AddEmptyInstructionAction();
         AddAction(SpecialAction.SpecialActionType.JumpIfFalse);
         ReadNextIfEqualElseThrow("do", node);
         node.Add(Oper());
         AddAction(AddressAction.AddressType.Instruction, jId);
         AddAction(SpecialAction.SpecialActionType.Jump);
-        InsertAction(jifId, AddressAction.AddressType.Instruction, _actions.Count + 1);
+        jif.Address = _actions.Count;
     }
 
     private void For(Node<string> node)
@@ -448,13 +456,13 @@ public class Parser
         if (!res.isCompare)
             PrintError(ErrorType.Unknown, "Not Compare");
         node.Add(res.node);
-        var jifFrom = _actions.Count;
+        var jif = AddEmptyInstructionAction();
         AddAction(SpecialAction.SpecialActionType.JumpIfFalse);
         ReadNextIfEqualElseThrow("do", node);
         node.Add(Oper());
         AddAction(AddressAction.AddressType.Instruction, jTo);
         AddAction(SpecialAction.SpecialActionType.Jump);
-        InsertAction(jifFrom, AddressAction.AddressType.Instruction, _actions.Count + 1);
+        jif.Address = _actions.Count;
     }
 
     private void Read(Node<string> node)

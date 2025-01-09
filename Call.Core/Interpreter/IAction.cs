@@ -73,7 +73,7 @@ public class AddressAction
     }
 
     public AddressType Type { get; }
-    public int Address { get; }
+    public int Address { get; set; }
 
     public AddressAction(AddressType type, int address)
     {

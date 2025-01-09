@@ -25,7 +25,9 @@ public static class CreateUtils
     {
         var button = new Button()
         {
-            Text = text ?? ""
+            Text = text ?? "",
+            FlatStyle = FlatStyle.Flat,
+            FlatAppearance = { BorderSize = 0 }
         };
         return button;
     }
@@ -35,6 +37,8 @@ public static class CreateUtils
         var button = CreateButton(text);
         button.BackgroundImage = Image.FromFile("Icons/" + iconName);
         button.BackgroundImageLayout = ImageLayout.Zoom;
+        button.FlatStyle = FlatStyle.Flat;
+        button.FlatAppearance.BorderSize = 0;
         return button;
     }
 
